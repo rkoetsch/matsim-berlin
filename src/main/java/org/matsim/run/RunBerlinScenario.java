@@ -58,10 +58,11 @@ import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 /**
  * @author ikaddoura
  */
-
 public final class RunBerlinScenario {
 
 	private static final Logger log = Logger.getLogger(RunBerlinScenario.class);
+	private static final String letter = "I";
+	private static final String percent = "10";
 
 	public static void main(String[] args) {
 
@@ -70,7 +71,8 @@ public final class RunBerlinScenario {
 		}
 
 		if (args.length == 0) {
-			args = new String[] { "scenarios/berlin-v5.4-1pct/input/berlin-v5.4-1pct.config.xml" };
+			args = new String[] { "D:\\Rico\\" + percent + "pc\\100v8\\scenario-" + letter + "\\finalIteration\\final"
+					+ letter + ".config.xml" };
 		}
 
 		Config config = prepareConfig(args);
@@ -105,22 +107,22 @@ public final class RunBerlinScenario {
 
 		try {
 
-			FileWriter csvWriter = new FileWriter("examplePaths.csv");
+			FileWriter csvWriter = new FileWriter("examplePaths" + letter + percent +".csv");
 			csvWriter.append("from; to; hour; time; distance; path\n");
 
 			// von TU to CBA
-				fromNode = network.getNodes().get(Id.createNodeId(21590985));
-				toNode = network.getNodes().get(Id.createNodeId(1822477776));
-				print(calc, fromNode, toNode, csvWriter);
+			fromNode = network.getNodes().get(Id.createNodeId(21590985));
+			toNode = network.getNodes().get(Id.createNodeId(1822477776));
+			print(calc, fromNode, toNode, csvWriter);
 
 			// von MD to TU
-				fromNode = network.getNodes().get(Id.createNodeId(266630013));
-				toNode = network.getNodes().get(Id.createNodeId(21590985));
-				print(calc, fromNode, toNode, csvWriter);
+			fromNode = network.getNodes().get(Id.createNodeId(266630013));
+			toNode = network.getNodes().get(Id.createNodeId(21590985));
+			print(calc, fromNode, toNode, csvWriter);
 			// von NK to TU
-				fromNode = network.getNodes().get(Id.createNodeId(1679931156));
-				toNode = network.getNodes().get(Id.createNodeId(21590985));
-				print(calc, fromNode, toNode, csvWriter);
+			fromNode = network.getNodes().get(Id.createNodeId(1679931156));
+			toNode = network.getNodes().get(Id.createNodeId(21590985));
+			print(calc, fromNode, toNode, csvWriter);
 			csvWriter.flush();
 			csvWriter.close();
 
@@ -130,7 +132,8 @@ public final class RunBerlinScenario {
 		}
 	}
 
-	private static void print(LeastCostPathCalculator calc, Node fromNode, Node toNode, FileWriter csvWriter) throws IOException {
+	private static void print(LeastCostPathCalculator calc, Node fromNode, Node toNode, FileWriter csvWriter)
+			throws IOException {
 		printPerHour(calc, fromNode, toNode, 0, csvWriter);
 		printPerHour(calc, fromNode, toNode, 1, csvWriter);
 		printPerHour(calc, fromNode, toNode, 2, csvWriter);
@@ -161,7 +164,8 @@ public final class RunBerlinScenario {
 			FileWriter csvWriter) throws IOException {
 		double starttime = hour * 3600;
 		Path path = calc.calcLeastCostPath(fromNode, toNode, starttime, null, null);
-		String str = fromNode.getId() + "; " + toNode.getId() + "; " + hour + "; " + path.travelTime + "; " + path.travelCost + ";  nodeIDs" + hour + " <- c(";
+		String str = fromNode.getId() + "; " + toNode.getId() + "; " + hour + "; " + path.travelTime + "; "
+				+ path.travelCost + ";  nodeIDs" + hour + " <- c(";
 		for (Node node : path.nodes) {
 			str = str + node.getId() + ", ";
 		}
