@@ -24,7 +24,6 @@ import static org.matsim.core.config.groups.ControlerConfigGroup.RoutingAlgorith
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -32,7 +31,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -43,7 +41,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -51,7 +48,6 @@ import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vehicles.Vehicle;
 
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
@@ -99,15 +95,55 @@ public final class RunBerlinScenario {
 		TravelDisutility travelCosts = disuFac.createTravelDisutility(timeCalculator);
 		LeastCostPathCalculator calc = calcFac.createPathCalculator(network, travelCosts, travelTimes);
 
+		printExampleRoutes(network, calc);
+		
+		printMatrix("berlin", network, calc,
+				new long[] { 26554202, 26754202, 26761185, 26785807, 26870674, 29218295, 29270520, 29686277, 29785890,
+						100163057, 254870237, 268224213, 269843861, 274977654, 275726428, 282395034, 677228677,
+						1380016717, 3712222554l, 4313424156l });
+		
+		printMatrix("partOfBerlin", network, calc,
+				new long[] { 26682577, 26736488, 26738756, 26787062, 26840975, 26849117, 26908562, 27212150, 27212418,
+						27501787, 27785308, 27786937, 28196764, 237203812, 447907184, 546901616, 846642205, 1054891928,
+						1949782772, 2353609856l });
+
+	}
+
+	private static void printMatrix(String name, Network network, LeastCostPathCalculator calc, long[] nodes) {
 		Node fromNode;
 		Node toNode;
-//		Person person = controler.getScenario().getPopulation().getPersons().values().iterator().next();
-//		Vehicle vehicle = controler.getScenario().getVehicles().getVehicles().values().iterator().next();
-//		Path path = calc.calcLeastCostPath(fromNode, toNode, starttime, person, vehicle);
-
 		try {
 
-			FileWriter csvWriter = new FileWriter("examplePaths" + letter + percent +".csv");
+			FileWriter csvWriter = new FileWriter(name + letter + percent + ".csv");
+			csvWriter.append("from; to; hour; time; distance; path\n");
+			// do it
+			for (int x = 0; x < nodes.length; x++) {
+				for (int y = 0; y < nodes.length; y++) {
+					long idFrom = nodes[x];
+					long idTo = nodes[y];
+					fromNode = network.getNodes().get(Id.createNodeId(idFrom));
+					toNode = network.getNodes().get(Id.createNodeId(idTo));
+					print(calc, fromNode, toNode, csvWriter);
+				}
+			}
+
+			// finish
+			csvWriter.flush();
+			csvWriter.close();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private static void printExampleRoutes(Network network, LeastCostPathCalculator calc) {
+		Node fromNode;
+		Node toNode;
+		try {
+
+			FileWriter csvWriter = new FileWriter("examplePaths" + letter + percent + ".csv");
 			csvWriter.append("from; to; hour; time; distance; path\n");
 
 			// von TU to CBA
@@ -165,11 +201,11 @@ public final class RunBerlinScenario {
 		double starttime = hour * 3600;
 		Path path = calc.calcLeastCostPath(fromNode, toNode, starttime, null, null);
 		String str = fromNode.getId() + "; " + toNode.getId() + "; " + hour + "; " + path.travelTime + "; "
-				+ path.travelCost + ";  nodeIDs" + hour + " <- c(";
+				+ path.travelCost + ";  ";
 		for (Node node : path.nodes) {
-			str = str + node.getId() + ", ";
+			str = str + node.getId() + ",";
 		}
-		str = str.substring(0, str.length() - 2) + ")\n";
+		str = str.substring(0, str.length() - 1) + "\n";
 		csvWriter.append(str);
 	}
 
@@ -197,11 +233,13 @@ public final class RunBerlinScenario {
 
 		// use the (congested) car travel time for the teleported ride mode
 		controler.addOverridingModule(new AbstractModule() {
+
 			@Override
 			public void install() {
 				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
 				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());
 			}
+
 		});
 
 		return controler;
