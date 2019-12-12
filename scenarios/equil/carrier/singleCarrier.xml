@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<carriers>
+		<carrier id="carrier1">
+			<capabilities fleetSize="1">
+				<vehicles>
+					<vehicle id="myVehicle" depotLinkId="1" typeId="one" earliestStart="06:00:00" latestEnd="16:00:00"/>
+				</vehicles>
+			</capabilities>
+
+			<services>
+				<service id="1" to="2" capacityDemand="1" earliestStart="04:00:00" latestEnd="10:00:00" serviceDuration="00:05:00"/>
+				<service id="2" to="4" capacityDemand="1" earliestStart="04:00:00" latestEnd="10:00:00" serviceDuration="00:05:00"/>
+				<service id="3" to="6" capacityDemand="1" earliestStart="04:00:00" latestEnd="10:00:00" serviceDuration="00:05:00"/>
+				<service id="4" to="8" capacityDemand="1" earliestStart="04:00:00" latestEnd="10:00:00" serviceDuration="00:05:00"/>
+				<service id="5" to="10" capacityDemand="1" earliestStart="04:00:00" latestEnd="10:00:00" serviceDuration="00:05:00"/>
+			</services>
+
+			<plan score="0" selected="true">
+				<tour vehicleId="myVehicle">
+					<act type="start" end_time="06:00:00" link="1"/>
+					<leg expected_dep_time="06:00:00" expected_transp_time="00:00:00">
+						<route>2</route>
+					</leg>
+					<act type="service" serviceId="1" link="2"/>
+					<leg expected_dep_time="06:00:00" expected_transp_time="00:00:00">
+						<route>3 12 13 14 15 1 2</route>
+					</leg>
+					<act type="service" serviceId="2" link="4"/>
+					<leg expected_dep_time="06:00:00" expected_transp_time="00:00:00">
+						<route>5 12 13 14 15 1 2</route>
+					</leg>
+					<act type="service" serviceId="3" link="6"/>
+					<leg expected_dep_time="06:00:00" expected_transp_time="00:00:00">
+						<route>7 12 13 14 15 1 2 </route>
+					</leg>
+					<act type="service" serviceId="4" link="8"/>
+					<leg expected_dep_time="06:00:00" expected_transp_time="00:00:00">
+						<route>9 12 13 14 15 1 2</route>
+					</leg>
+					<act type="service" serviceId="5" link="10"/>
+					<leg expected_dep_time="06:00:00" expected_transp_time="00:00:00">
+						<route>11 12 13 14 15 1</route>
+					</leg>
+					<act type="end" link="1"/>
+				</tour>
+			</plan>
+		</carrier>
+	</carriers>

@@ -50,13 +50,25 @@
 			<artifactId>matsim</artifactId>
 			<version>${matsim.version}</version>
 		</dependency>
-		
+
 		<dependency>
-        		<groupId>org.matsim.contrib</groupId>
-        		<artifactId>emissions</artifactId>
-        		<version>${matsim.version}</version>
-        		<scope>compile</scope>
-      		</dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>emissions</artifactId>
+			<version>${matsim.version}</version>
+			<scope>compile</scope>
+		</dependency>
+      	
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>freight</artifactId>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.matsim</groupId>
+					<artifactId>matsim-examples</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<!-- Include the JUnit testing library.  Not transitive. -->
 		<dependency>
