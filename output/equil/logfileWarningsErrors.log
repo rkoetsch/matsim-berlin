@@ -1,0 +1,29 @@
+2019-12-12 12:54:23,411  WARN PlanCalcScoreConfigGroup$ActivityParams:949 Setting minimalDuration different from zero is discouraged.  It is probably implemented correctly, but there is as of now no indication that it makes the results more realistic.  KN, Sep'08 This message given only once.
+2019-12-12 12:54:25,377  WARN PreProcessEuclidean:59 There are links with stored length smaller than their Euclidean distance in this network. Thus, A* cannot guarantee to calculate the least-cost paths between two nodes.
+2019-12-12 12:54:25,910  WARN PrepareForSimImpl:190 'usePersonIdForMissingVehicleId' is deprecated. It will be removed soon.
+2019-12-12 12:54:25,970  WARN ObjectAttributesConverter:75 No AttributeConverter found for class java.util.HashMap. Not all attribute values can be converted.
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=1; req flow cap/h=36000.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:378 Link 1 too small: enlarge storage capacity from: 1333.3333333333333 Vehicles to: 3599.712023038157 Vehicles.  This is not fatal, but modifies the traffic flow dynamics.
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 3599.712023038157 to 27599.712023038155
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=2; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=3; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=4; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,222  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=5; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=6; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=7; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=8; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,230  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=9; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,232  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,232  WARN QueueWithBuffer:329 max flow from fdiag < requested flow cap; linkId=10; req flow cap/h=3600.0; max flow from fdiag/h=1739.1485809682804
+2019-12-12 12:54:26,232  WARN QueueWithBuffer:333  Future occurences of this logging statement are suppressed.
+2019-12-12 12:54:26,232  WARN QueueWithBuffer:414 storage capacity not sufficient for holes; increasing from 1333.3333333333333 to 2759.9712023038155
+2019-12-12 12:54:26,253  WARN QVehicleImpl:75 No VehicleCapacity (= maximum number of passengers) set in Vehicle. Using default value of 4.  This is only a problem if you need vehicles with different capacities, e.g. for minibuses.
+2019-12-12 12:54:26,371  WARN DefaultTurnAcceptanceLogic:57 Cannot move vehicle freight_carrier1_veh_myVehicle_0 from link 2 to link 3
+2019-12-12 12:54:29,062  WARN ObjectAttributesConverter:75 No AttributeConverter found for class java.util.HashMap. Not all attribute values can be converted.

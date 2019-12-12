@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<vehicleTypes>
+		<vehicleType id="one">
+			<description>null</description>
+			<capacity>50</capacity>
+			<costInformation fix="130.0" perMeter="7.7E-4" perSecond="0.008"/>
+		</vehicleType>
+	</vehicleTypes>
+
