@@ -66,9 +66,9 @@ import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
  * @author ikaddoura
  */
 
-public final class RunBerlinScenarioOriginal {
+public final class RunBerlinScenarioFreightTests {
 
-	private static final Logger log = Logger.getLogger(RunBerlinScenarioOriginal.class);
+	private static final Logger log = Logger.getLogger(RunBerlinScenarioFreightTests.class);
 
 	public static void main(String[] args) {
 
