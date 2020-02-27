@@ -70,7 +70,7 @@ public class RunBerlinScenarioTest {
 					"--config:controler.runId", "test-run-ID",
 					"--config:controler.outputDirectory", utils.getOutputDirectory()};
 			
-			Config config =  RunBerlinScenario.prepareConfig( args );
+			Config config =  RunBerlinScenarioMatrixCalculation.prepareConfig( args );
 			Assert.assertEquals("Wrong parameter from command line", "test-run-ID", config.controler().getRunId());
 
 			log.info( "Done with bTestConfig1"  );
@@ -90,7 +90,7 @@ public class RunBerlinScenarioTest {
 					"--config:controler.outputDirectory", utils.getOutputDirectory(),
 					"--config:planCalcScore.scoringParameters[subpopulation=null].modeParams[mode=car].constant", "-0.12345"};
 			
-			Config config =  RunBerlinScenario.prepareConfig( args );
+			Config config =  RunBerlinScenarioMatrixCalculation.prepareConfig( args );
 			Assert.assertEquals("Wrong parameter from command line", -0.12345, config.planCalcScore().getModes().get("car").getConstant(), MatsimTestUtils.EPSILON);
 
 			log.info( "Done with cTestConfig2"  );
@@ -111,7 +111,7 @@ public class RunBerlinScenarioTest {
 			final String[] args = {configFilename,
 					"--config:controler.outputDirectory", utils.getOutputDirectory(),
 			};
-			RunBerlinScenario.main( args );
+			RunBerlinScenarioMatrixCalculation.main( args );
 			
 		} catch ( Exception ee ) {
 			ee.printStackTrace();
@@ -129,7 +129,7 @@ public class RunBerlinScenarioTest {
 					"--config:controler.outputDirectory", utils.getOutputDirectory(),
 					"--config:vspExperimental.vspDefaultsCheckingLevel", "warn"
 			};
-			RunBerlinScenario.main( args );
+			RunBerlinScenarioMatrixCalculation.main( args );
 			
 		} catch ( Exception ee ) {
 			ee.printStackTrace();
@@ -143,16 +143,16 @@ public class RunBerlinScenarioTest {
 		try {
 			final String[] args = {"scenarios/berlin-v5.4-1pct/input/berlin-v5.4-1pct.config.xml"};
 			
-			Config config =  RunBerlinScenario.prepareConfig( args );
+			Config config =  RunBerlinScenarioMatrixCalculation.prepareConfig( args );
 			config.controler().setLastIteration(0);
 			config.strategy().setFractionOfIterationsToDisableInnovation(0);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			config.controler().setOutputDirectory( utils.getOutputDirectory() );
 			config.plans().setInputFile("../../../test/input/test-agents.xml");
 			
-			Scenario scenario = RunBerlinScenario.prepareScenario( config );
+			Scenario scenario = RunBerlinScenarioMatrixCalculation.prepareScenario( config );
 			
-			Controler controler = RunBerlinScenario.prepareControler( scenario ) ;
+			Controler controler = RunBerlinScenarioMatrixCalculation.prepareControler( scenario ) ;
 			
 			controler.run() ;
 			
@@ -176,7 +176,7 @@ public class RunBerlinScenarioTest {
 		try {
 			final String[] args = {"scenarios/berlin-v5.4-1pct/input/berlin-v5.4-1pct.config.xml"};
 			
-			Config config =  RunBerlinScenario.prepareConfig( args ) ;
+			Config config =  RunBerlinScenarioMatrixCalculation.prepareConfig( args ) ;
 			config.controler().setLastIteration(1);
 			config.strategy().setFractionOfIterationsToDisableInnovation(1);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
@@ -185,9 +185,9 @@ public class RunBerlinScenarioTest {
 			config.global().setNumberOfThreads(1);
 			config.qsim().setNumberOfThreads(1);
 			
-			Scenario scenario = RunBerlinScenario.prepareScenario( config ) ;
+			Scenario scenario = RunBerlinScenarioMatrixCalculation.prepareScenario( config ) ;
 			
-			Controler controler = RunBerlinScenario.prepareControler( scenario ) ;
+			Controler controler = RunBerlinScenarioMatrixCalculation.prepareControler( scenario ) ;
 			
 			controler.run() ;
 			

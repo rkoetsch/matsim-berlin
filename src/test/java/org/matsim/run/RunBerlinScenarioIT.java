@@ -32,15 +32,15 @@ public class RunBerlinScenarioIT{
 		try {
 			final String[] args = {"scenarios/berlin-v5.4-10pct/input/berlin-v5.4-10pct.config.xml"};
 
-			Config config =  RunBerlinScenario.prepareConfig( args ) ;
+			Config config =  RunBerlinScenarioMatrixCalculation.prepareConfig( args ) ;
 			config.controler().setLastIteration(1);
 			config.strategy().setFractionOfIterationsToDisableInnovation(1);
 			config.controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists );
 			config.controler().setOutputDirectory( utils.getOutputDirectory() );
 			
-			Scenario scenario = RunBerlinScenario.prepareScenario( config ) ;
+			Scenario scenario = RunBerlinScenarioMatrixCalculation.prepareScenario( config ) ;
 			
-			Controler controler = RunBerlinScenario.prepareControler( scenario ) ;
+			Controler controler = RunBerlinScenarioMatrixCalculation.prepareControler( scenario ) ;
 
 			controler.run() ;
 
@@ -67,7 +67,7 @@ public class RunBerlinScenarioIT{
 		try {
 			final String[] args = {"scenarios/berlin-v5.4-1pct/input/berlin-v5.4-1pct.config.xml"};
 
-			Config config = RunBerlinScenario.prepareConfig( args ) ;
+			Config config = RunBerlinScenarioMatrixCalculation.prepareConfig( args ) ;
 			config.controler().setLastIteration(iteration);
 
 			config.qsim().setNumberOfThreads( 1 );
@@ -83,14 +83,14 @@ public class RunBerlinScenarioIT{
 			config.controler().setWritePlansUntilIteration( 0 );
 			config.controler().setWritePlansInterval( 0 );
 			
-			Scenario scenario = RunBerlinScenario.prepareScenario( config ) ;
+			Scenario scenario = RunBerlinScenarioMatrixCalculation.prepareScenario( config ) ;
 			
 			final double sample = 0.1;
 			downsample( scenario.getPopulation().getPersons(), sample ) ;
 			config.qsim().setFlowCapFactor( config.qsim().getFlowCapFactor()*sample );
 			config.qsim().setStorageCapFactor( config.qsim().getStorageCapFactor()*sample );
 
-			Controler controler = RunBerlinScenario.prepareControler( scenario ) ;
+			Controler controler = RunBerlinScenarioMatrixCalculation.prepareControler( scenario ) ;
 			
 			controler.run() ;
 
