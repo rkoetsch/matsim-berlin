@@ -26,19 +26,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
-import org.matsim.contrib.freight.carrier.CarrierShipment;
+import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierUtils;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
@@ -53,8 +51,6 @@ import org.matsim.contrib.freight.controler.CarrierScoringFunctionFactory;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.contrib.freight.jsprit.NetworkRouter;
-import org.matsim.contrib.freight.usecases.analysis.CarrierScoreStats;
-import org.matsim.contrib.freight.usecases.analysis.LegHistogram;
 import org.matsim.contrib.freight.usecases.chessboard.CarrierScoringFunctionFactoryImpl;
 import org.matsim.contrib.freight.utils.FreightUtils;
 import org.matsim.core.config.Config;
@@ -64,12 +60,14 @@ import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.OutputDirectoryLogging;
-import org.matsim.core.controler.events.IterationEndsEvent;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -80,35 +78,34 @@ import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
  * @author ikaddoura
  */
 
-public final class RunBerlinScenarioFreightTests {
+public final class RunBerlinScenarioFreightServiceTests {
 
-	private static final Logger log = Logger.getLogger(RunBerlinScenarioFreightTests.class);
-	private static final Id<Link> depotLinkId = Id.createLinkId("1");
+	private static final Id<Link> depotLinkId = Id.createLinkId("100575");
+	private static final double vehicleStartTime = 3600 * 16; // 0
+	private static final double vehicleEndTime = 0; // 36000
+	private static final double serviceDuration = 0; // 300.0
+	private static final double twStart = 0; // 3600.0
+	private static final double twEnd = 0; // 36000.0
+	
+	private static final String scenarioConfig = "scenarios/berlin-v5.4-1pct/input/berlin-v5.4-1pct.config.xml";
+//	private static final List<String> serviceOrder = new ArrayList<String>(Arrays.asList("2","4","5","8","10"));
+	private static final List<String> serviceOrder = new ArrayList<String>(Arrays.asList("19499","195","5503","55028","128795"));
 
-	// define shipments
-	private static List<CarrierShipment> createCarrierShipments() {
-		List<CarrierShipment> shipments = new ArrayList<CarrierShipment>();
-		shipments.add(createShipment("1", "2", "2", 1));
-		shipments.add(createShipment("2", "4", "4", 1));
-		shipments.add(createShipment("3", "6", "6", 1));
-		shipments.add(createShipment("4", "8", "8", 1));
-		shipments.add(createShipment("5", "10", "10", 1));
-		return shipments;
-	}
 
+	
+	
+	private static final Logger log = Logger.getLogger(RunBerlinScenarioFreightServiceTests.class);
 	private static ScheduledTour createTour(CarrierVehicle carrierVehicle, double tourDepTime,
-			List<CarrierShipment> shipments) {
+			List<CarrierService> shipments) {
 		
 		Tour.Builder tourBuilder = Tour.Builder.newInstance();
-		tourBuilder.scheduleStart(depotLinkId);
-		for (CarrierShipment shipment : shipments) {
+		tourBuilder.scheduleStart(carrierVehicle.getLocation());
+		for (CarrierService shipment : shipments) {
 			tourBuilder.addLeg(new Leg());
-			tourBuilder.schedulePickup(shipment);
-			tourBuilder.addLeg(new Leg());
-			tourBuilder.scheduleDelivery(shipment);
+			tourBuilder.scheduleService(shipment);
 		}
 		tourBuilder.addLeg(new Leg());
-		tourBuilder.scheduleEnd(depotLinkId);
+		tourBuilder.scheduleEnd(carrierVehicle.getLocation());
 
 		org.matsim.contrib.freight.carrier.Tour vehicleTour = tourBuilder.build();
 		ScheduledTour sTour = ScheduledTour.newInstance(vehicleTour, carrierVehicle, tourDepTime);
@@ -123,7 +120,7 @@ public final class RunBerlinScenarioFreightTests {
 		}
 
 		if (args.length == 0) {
-			args = new String[] { "scenarios/equil/config.xml" };
+			args = new String[] { scenarioConfig };
 		}
 
 		Config config = prepareConfig(args);
@@ -132,18 +129,11 @@ public final class RunBerlinScenarioFreightTests {
 		Scenario scenario = prepareScenario(config);
 		Controler controler = prepareControler(scenario);
 
-//		final Carriers carriers = FreightUtils.getCarriers(scenario);
-//		new CarrierPlanXmlReader(carriers).readURL(IOUtils.extendUrl(config.getContext(), "carrier/singleCarrier.xml"));
-
 		Carriers carriers = FreightUtils.getOrCreateCarriers(scenario);
 		CarrierVehicle vehicle = createCarrierVehicle(scenario);
-		List<CarrierShipment> shipments = createCarrierShipments();
+		List<CarrierService> shipments = createCarrierShipments();
 		Carrier carrier = createCarrier(vehicle, shipments);
 		carriers.addCarrier(carrier);
-
-//		final CarrierVehicleTypes types = new CarrierVehicleTypes();
-//		new CarrierVehicleTypeReader(types).readURL(IOUtils.extendUrl(config.getContext(), "carrier/vehicleTypes.xml"));
-//		new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(types);
 		
 		
 		CarrierCapabilities.Builder ccBuilder = CarrierCapabilities.Builder.newInstance().addType(vehicle.getType())
@@ -153,20 +143,18 @@ public final class RunBerlinScenarioFreightTests {
 	
 
 		Collection<ScheduledTour> scheduledTours = new ArrayList<ScheduledTour>();															// Cases raus.
-		scheduledTours.add(createTour(vehicle, 0, shipments));		
+		scheduledTours.add(createTour(vehicle, vehicle.getEarliestStartTime(), shipments));		
 		CarrierPlan carrierPlan = new CarrierPlan(carrier, scheduledTours);
 		carrierPlan.setScore((double) (999 * (-1)));
 
 		Collection<VehicleType> vehicleTypes = new ArrayList<VehicleType>();
 		vehicleTypes.add(vehicle.getType());
 		Builder netBuilder = NetworkBasedTransportCosts.Builder.newInstance(scenario.getNetwork(), vehicleTypes );
-//		Builder netBuilder = NetworkBasedTransportCosts.Builder.newInstance(scenario.getNetwork());
 		final NetworkBasedTransportCosts netBasedCosts = netBuilder.build();
+		
+		
 		NetworkRouter.routePlan(carrierPlan, netBasedCosts);
 		carrier.setSelectedPlan(carrierPlan);
-
-		new CarrierPlanXmlWriterV2(carriers)
-				.write(config.controler().getOutputDirectory() + "/servicesAndShipments_plannedCarriers.xml");
 
 
 		// --------- now register freight and start a MATsim run:
@@ -180,19 +168,25 @@ public final class RunBerlinScenarioFreightTests {
 				bind( CarrierScoringFunctionFactory.class ).to( CarrierScoringFunctionFactoryImpl.class  ) ;
 			}
 		});
-//		Freight.configure(controler);
-//		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );;
-//		freightConfig.setTimeWindowHandling(FreightConfigGroup.TimeWindowHandling.enforceBeginnings);
-//		addFreightConfig(config, controler, carriers);
 		controler.run();
 
 	}
+	
+	private static List<CarrierService> createCarrierShipments() {
+		List<CarrierService> shipments = new ArrayList<CarrierService>();
+		
+		int counter = 0;
+		for (String service : serviceOrder) {
+			shipments.add(createService("s"+ counter, service, serviceDuration, twStart, twEnd));
+			counter++;
+		}
+		return shipments;
+	}
 
-	private static Carrier createCarrier(CarrierVehicle carrierVehicle, List<CarrierShipment> shipments) {
+	private static Carrier createCarrier(CarrierVehicle carrierVehicle, List<CarrierService> shipments) {
 		Carrier carrierWShipments = CarrierUtils.createCarrier(Id.create("carrier", Carrier.class));
-		// TODO: Geht derzeit nur als "int" für ovgu... kmt/aug19
-		for (CarrierShipment shipment : shipments)
-			CarrierUtils.addShipment(carrierWShipments, shipment);
+		for (CarrierService shipment : shipments)
+			CarrierUtils.addService(carrierWShipments, shipment);
 
 		// capabilities -> assign vehicles or vehicle types to carrier
 		CarrierCapabilities.Builder ccBuilder = CarrierCapabilities.Builder.newInstance()
@@ -202,21 +196,16 @@ public final class RunBerlinScenarioFreightTests {
 		return carrierWShipments;
 	}
 
-	private static CarrierShipment createShipment(String id, String from, String to, int size) {
-		Id<CarrierShipment> shipmentId = Id.create(id, CarrierShipment.class);
+	private static CarrierService createService(String id, String from, double serviceDuration, double twStart, double twEnd) {
+		Id<CarrierService> shipmentId = Id.create(id, CarrierService.class);
 		Id<Link> fromLinkId = null;
-		Id<Link> toLinkId = null;
 
 		if (from != null) {
 			fromLinkId = Id.create(from, Link.class);
 		}
-		if (to != null) {
-			toLinkId = Id.create(to, Link.class);
-		}
 
-		return CarrierShipment.Builder.newInstance(shipmentId, fromLinkId, toLinkId, size).setDeliveryServiceTime(30.0)
-				.setDeliveryTimeWindow(TimeWindow.newInstance(3600.0, 36000.0)).setPickupServiceTime(5.0)
-				.setPickupTimeWindow(TimeWindow.newInstance(0.0, 7200.0)).build();
+		return CarrierService.Builder.newInstance(shipmentId, fromLinkId).setServiceDuration(serviceDuration)
+				.setServiceStartTimeWindow(TimeWindow.newInstance(twStart, twEnd)).build();
 	}
 
 	private static CarrierVehicle createCarrierVehicle(Scenario scenario) {
@@ -231,7 +220,7 @@ public final class RunBerlinScenarioFreightTests {
 		// create vehicle
 		CarrierVehicle carrierVehicle = CarrierVehicle.Builder
 				.newInstance(Id.create("gridVehicle", org.matsim.vehicles.Vehicle.class), depotLinkId)
-				.setEarliestStart(0.0).setLatestEnd(36000.0).setType(carrierVehType).build();
+				.setEarliestStart(vehicleStartTime).setLatestEnd(vehicleEndTime).setType(carrierVehType).build();
 
 		return carrierVehicle;
 	}
@@ -247,62 +236,6 @@ public final class RunBerlinScenarioFreightTests {
 		VehicleUtils.setHbefaTechnology(vehicleType.getEngineInformation(), "diesel");
 		VehicleUtils.setFuelConsumption(vehicleType, 0.015);
 		return vehicleType;
-	}
-
-	private static void addFreightConfig(Config config, Controler controler, Carriers carriers) {
-
-//        controler.addOverridingModule(new AbstractModule() {
-//            @Override
-//            public void install() {
-//                //                CarrierModule carrierModule = new CarrierModule(carriers);
-//                //                carrierModule.setPhysicallyEnforceTimeWindowBeginnings(true);
-//                //                install(carrierModule);
-//                bind(CarrierPlanStrategyManagerFactory.class).toInstance( new MyCarrierPlanStrategyManagerFactory(types) );
-//                bind(CarrierScoringFunctionFactory.class).toInstance( new MyCarrierScoringFunctionFactory() );
-//            }
-//        });
-		controler.addOverridingModule(new AbstractModule() {
-
-			@Override
-			public void install() {
-				final CarrierScoreStats scores = new CarrierScoreStats(carriers,
-						config.controler().getOutputDirectory() + "/carrier_scores", true);
-				final int statInterval = 1;
-				final LegHistogram freightOnly = new LegHistogram(900);
-				freightOnly.setInclPop(false);
-				binder().requestInjection(freightOnly);
-				final LegHistogram withoutFreight = new LegHistogram(900);
-				binder().requestInjection(withoutFreight);
-
-				addEventHandlerBinding().toInstance(withoutFreight);
-				addEventHandlerBinding().toInstance(freightOnly);
-				addControlerListenerBinding().toInstance(scores);
-				addControlerListenerBinding().toInstance(new IterationEndsListener() {
-
-					@Inject
-					private OutputDirectoryHierarchy controlerIO;
-
-					@Override
-					public void notifyIterationEnds(IterationEndsEvent event) {
-						if (event.getIteration() % statInterval != 0)
-							return;
-						// write plans
-						String dir = controlerIO.getIterationPath(event.getIteration());
-						new CarrierPlanXmlWriterV2(carriers)
-								.write(dir + "/" + event.getIteration() + ".singleCarrier.xml");
-
-						// write stats
-						freightOnly.writeGraphic(dir + "/" + event.getIteration() + ".legHistogram_freight.png");
-						freightOnly.reset(event.getIteration());
-
-						withoutFreight
-								.writeGraphic(dir + "/" + event.getIteration() + ".legHistogram_withoutFreight.png");
-						withoutFreight.reset(event.getIteration());
-					}
-				});
-			}
-		});
-
 	}
 
 	public static Controler prepareControler(Scenario scenario) {

@@ -21,6 +21,7 @@ package org.matsim.run;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
@@ -39,7 +40,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.MainModeIdentifierImpl;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.testcases.MatsimTestUtils;
@@ -217,7 +217,11 @@ public class RunBerlinScenarioTest {
 		
 		Map<String,Double> modeCnt = new TreeMap<>() ;
 
-		StageActivityTypesImpl stageActivities = new StageActivityTypesImpl(Arrays.asList("pt interaction", "car interaction", "ride interaction", "bicycle interaction", "freight interaction"));
+	
+//		StageActivityTypesImpl stageActivities = new StageActivityTypesImpl(Arrays.asList("pt interaction", "car interaction", "ride interaction", "bicycleinteraction", "freight interaction"));
+//TODO:	NEEDS TO BE CHECKT, probably error
+		Set<String> stageActivities = (Set<String>) Arrays.asList("pt interaction", "car interaction", "ride interaction", "bicycle interaction", "freight interaction");
+		
 		MainModeIdentifierImpl mainModeIdentifier = new MainModeIdentifierImpl();
 		
 		for (Person person : population.getPersons().values()) {
