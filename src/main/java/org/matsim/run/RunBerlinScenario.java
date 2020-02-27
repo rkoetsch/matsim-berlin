@@ -575,5 +575,4 @@ public final class RunBerlinScenario {
 
 		return config;
 	}
-
 }
