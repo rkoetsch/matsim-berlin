@@ -227,7 +227,8 @@ public class RunBerlinScenarioTest {
 		for (Person person : population.getPersons().values()) {
 			Plan plan = person.getSelectedPlan() ;
 
-			List<Trip> trips = TripStructureUtils.getTrips(plan, stageActivities) ;
+			// OLD: List<Trip> trips = TripStructureUtils.getTrips(plan, stageActivities) ;
+			List<Trip> trips = TripStructureUtils.getTrips(plan);
 			for ( Trip trip : trips ) {
 				String mode = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
 				
